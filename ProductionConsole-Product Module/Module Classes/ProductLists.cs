@@ -46,7 +46,7 @@ namespace ProductionConsole_Product_Module
             ProductList.Add(product);
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Product Created. Press any key to return");
-            Console.ResetColor();
+            Console.ResetColor(); 
             Console.ReadKey();
         }
 

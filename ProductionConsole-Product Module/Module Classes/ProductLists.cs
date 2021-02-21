@@ -42,7 +42,7 @@ namespace ProductionConsole_Product_Module
             var an = Console.ReadLine();
             ListIDGenerator();  //generates unique ID
             var lID = ListCount;
-            Products product = new Products(pn, rev, an, lID);
+            Products product = new Products(pn, rev, an, lID); 
             ProductList.Add(product);
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Product Created. Press any key to return");

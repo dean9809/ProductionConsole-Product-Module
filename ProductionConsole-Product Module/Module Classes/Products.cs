@@ -59,7 +59,7 @@ namespace ProductionConsole_Product_Module
             this.ArticleNumber = an;
             this.DateCreated = dTN;
             this.ListID = lID;
-            this.DateEdited = dE;
+            this.DateEdited = dE; 
         }
     }
 }

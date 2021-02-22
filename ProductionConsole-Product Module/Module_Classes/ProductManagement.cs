@@ -19,13 +19,22 @@ namespace ProductionConsole_Product_Module
         private int ListCount = 0;
 
        public void TESTMASSCREATE()
-        {//Creates bunch of objects and adds them to a list. the "an" is a string from int q. each loop adds +1 to q .
+       {//Creates bunch of objects and adds them to a list. the "an" is a string from int q. each loop adds +1 to q .
             //ONLY USED DURING TESTING
             int i;
             int q = 1;
             string pn = "test";
             string rev = "Rev";
-            for (i = 1; i <= 3; i++) { ++q; ListIDGenerator(); int lID = ListCount; string an = q.ToString(); Products product = new Products(pn, rev, an, lID); ProductList.Add(product);  }
+
+            for (i = 1; i <= 3; i++) 
+            { 
+              ++q;
+              ListIDGenerator();
+              int lID = ListCount;
+              string an = q.ToString();
+              Products product = new Products(pn, rev, an, lID);
+              ProductList.Add(product);
+            }
         }
        
         public void CreateNewProduct() 
@@ -45,7 +54,7 @@ namespace ProductionConsole_Product_Module
             Products product = new Products(pn, rev, an, lID); 
             ProductList.Add(product);
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Product Created. Press any key to return");
+            Console.WriteLine("Product Created. Press any key to return to the main menu");
             Console.ResetColor(); 
             Console.ReadKey();
         }
@@ -124,13 +133,81 @@ namespace ProductionConsole_Product_Module
                         ShowEditedProduct();
                         TempSearchList.Clear();
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("Edit successful. Press any key to return");
+                        Console.WriteLine("Edit successful. Press any key to return to the main menu");
                         Console.ResetColor();
                         Console.ReadKey();
                     }
                     else { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine("Search failed to find a match. Press any key to return to the main menu"); Console.ReadKey(); return; }//failed search message
         } //finds an existing product via a search for name, id or art no. Edits values and updates them
 
+        public void DeleteExistingProduct()
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("Product Removal");
+            Console.ResetColor();
+            Console.WriteLine("Press 1 to search by ID");
+            Console.WriteLine("Press 2 to search by Product Name");
+            Console.WriteLine("Press 3 to search by Article Number");
+            string selection = Console.ReadLine();
+            var item = ProductList.FirstOrDefault();
+            switch (selection)
+            {
+                case "1":
+                    Console.Write("Search for an ID: ");
+
+                    string lIDsearch = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(lIDsearch)) { return; }
+                    try // Input validation and conversion to int
+                    {
+                        int lIDsearchInt = Int32.Parse(lIDsearch);
+                        item = ProductList.FirstOrDefault(o => o.ListID == lIDsearchInt);
+                        if (item == null) { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine("Search failed to find a match. Press any key to return to the main menu"); Console.ReadKey(); return; }
+                        TempSearchList.Add(item);
+                    }
+                    catch { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine("Invalid Search. Check that you are only using intergers."); Console.ReadKey(); Console.ResetColor(); return; } //Failed search 
+                    break;
+                case "2":
+                    Console.Write("Search for a Product Name: ");
+                    string pnSearch = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(pnSearch)) { return; }
+                    item = ProductList.FirstOrDefault(o => o.ProductName == pnSearch);
+                    if (item == null) { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine("Search failed to find a match. Press any key to return to the main menu"); Console.ReadKey(); return; }
+                    TempSearchList.Add(item);
+                    break;
+                case "3":
+                    Console.Write("Search for an Article Number: ");
+                    string anSearch = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(anSearch)) { return; }
+                    item = ProductList.FirstOrDefault(o => o.ArticleNumber == anSearch);
+                    if (item == null) { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine("Search failed to find a match. Press any key to return to the main menu"); Console.ReadKey(); return; }
+                    TempSearchList.Add(item);
+                    break;
+                default:
+                    return;
+            }
+            Console.WriteLine();
+            ShowSearchedProduct();
+            TempSearchList.Clear();
+            Console.WriteLine("Type DELETE to remove this product. Leave blank to keep original values.");
+            string deleteYES = Console.ReadLine() ;
+            if ((deleteYES != "DELETE"))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Action cancled. Press any key to return to the main menu");
+                Console.ReadKey(); Console.ResetColor();
+                return;
+            }
+            else
+            ProductList.Remove(item);
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Product successfully removed. Press any key to return to the main menu");
+            Console.ResetColor();
+            Console.ReadKey();
+            return;
+
+            //input verification and then delete method here
+        }
         public void ShowAllProducts() //shows all products saved in the list
         {
             Console.Clear();
@@ -158,7 +235,7 @@ namespace ProductionConsole_Product_Module
                 }
             }
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("End of list. Press any key to return");
+            Console.WriteLine("End of list. Press any key to return to the main menu");
             Console.ResetColor();
             Console.ReadKey();
 
@@ -219,46 +296,70 @@ namespace ProductionConsole_Product_Module
         }
         public void StartUpListCount()//Counts all files in the list at the beginning of the program
         {
-            /*foreach (var product in ProductList)
-            { ListIDGenerator(); }*/
             int max = ProductList.Max(t => t.ListID);
-            //int maxInt = Int32.Parse(max);
             ListCount = max;
-
         }
         public void SaveProductList() //Saves the product list to a txt file
         {
-            using (StreamWriter sw = new StreamWriter("ProductList.txt"))
+            try
             {
-                foreach (var product in ProductList)
+                using (StreamWriter sw = new StreamWriter(@"Data\ProductList.txt"))
                 {
-                    sw.WriteLine("{0},{1},{2},{3},{4},{5}", product.ListID, product.ProductName, product.Revision, product.ArticleNumber, product.DateCreated, product.DateEdited);
+                    foreach (var product in ProductList)
+                    {
+                        sw.WriteLine("{0},{1},{2},{3},{4},{5}", product.ListID, product.ProductName, product.Revision, product.ArticleNumber, product.DateCreated, product.DateEdited);
+                    }
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Saving Complete. Press any key to return to the main menu");
+                    Console.ResetColor();
+                    Console.ReadKey();
                 }
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Saving Complete. Press any key to continue...");
+            }
+            catch
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Saving failed. Press any key to return to the main menu");
                 Console.ResetColor();
                 Console.ReadKey();
+                return;
             }
         }
         public void LoadProductList() //loads all saved products from the txt file and sets ListCount
         {
-            using (StreamReader sr = new StreamReader("ProductList.txt"))
+
+            try
             {
-                string textLine;
-                ProductList.Clear();
-                while ((textLine = sr.ReadLine()) != null)
+                using (StreamReader sr = new StreamReader(@"Data\ProductList.txt"))
                 {
-                    string[] ta = textLine.Split(",");
-                    var pn = ta[1]; var rev = ta[2]; var an = ta[3]; var dTN = ta[4]; var slID = ta[0]; var dE = ta[5];
-                    int lID = Int32.Parse(slID);
-                    Products product = new Products(pn, rev, an, dTN, lID, dE);
-                    ProductList.Add(product);
+                    string textLine;
+                    ProductList.Clear();
+                    while ((textLine = sr.ReadLine()) != null)
+                    {
+                        string[] loadedTextArray = textLine.Split(",");
+                        var pn = loadedTextArray[1];
+                        var rev = loadedTextArray[2];
+                        var an = loadedTextArray[3];
+                        var dTN = loadedTextArray[4];
+                        var slID = loadedTextArray[0];
+                        var dE = loadedTextArray[5];
+                        int lID = Int32.Parse(slID);
+                        Products product = new Products(pn, rev, an, dTN, lID, dE);
+                        ProductList.Add(product);
+                    }
+                    StartUpListCount();
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Loading Complete. Press any key to return to the main menu");
+                    Console.ResetColor();
+                    Console.ReadKey();
                 }
-                StartUpListCount();
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Loading Complete. Press any key to continue...");
+            }
+            catch
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Loading failed. Press any key to return to the main menu");
                 Console.ResetColor();
                 Console.ReadKey();
+                return;
             }
         }
     }

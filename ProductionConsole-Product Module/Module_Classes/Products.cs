@@ -50,6 +50,7 @@ namespace ProductionConsole_Product_Module
             this.ArticleNumber = an;
             this.DateCreated = DateTime.Now.ToString();
             this.ListID = lID;
+            this.DateEdited = "Never";
         }
         public Products(string pn, string rev, string an, string dTN, int lID, string dE)
         {
